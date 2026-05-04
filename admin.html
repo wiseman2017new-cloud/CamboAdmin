@@ -1417,36 +1417,12 @@
               <div class="tbl-wrap" style="overflow-x: auto">
                 <table id="reportTable" style="min-width: 2400px">
                   <thead>
-                    <tr>
+                    <tr id="reportTableHead">
                       <th>Timestamp</th>
                       <th>Username</th>
                       <th>Driver</th>
                       <th>Branch</th>
                       <th>Date</th>
-                      <th>Q1</th>
-                      <th>Noted Q1</th>
-                      <th>Q2</th>
-                      <th>Noted Q2</th>
-                      <th>Q3</th>
-                      <th>Noted Q3</th>
-                      <th>Q4</th>
-                      <th>Noted Q4</th>
-                      <th>Q5</th>
-                      <th>Noted Q5</th>
-                      <th>Q6</th>
-                      <th>Noted Q6</th>
-                      <th>Q7</th>
-                      <th>Noted Q7</th>
-                      <th>Q8</th>
-                      <th>Noted Q8</th>
-                      <th>Q9</th>
-                      <th>Noted Q9</th>
-                      <th>Q10</th>
-                      <th>Noted Q10</th>
-                      <th>Q11</th>
-                      <th>Noted Q11</th>
-                      <th>Q12</th>
-                      <th>Noted Q12</th>
                     </tr>
                   </thead>
                   <tbody id="reportTableBody">
@@ -2119,8 +2095,28 @@
 
       async function loadReport() {
         const tbody = document.getElementById("reportTableBody");
-        tbody.innerHTML =
-          '<tr><td colspan="29"><div class="spinner"></div></td></tr>';
+        const totalCols = 5 + allQuestions.length * 2;
+        tbody.innerHTML = `<tr><td colspan="${totalCols}"><div class="spinner"></div></td></tr>`;
+
+        // Sort questions once
+        const qs = allQuestions
+          .slice()
+          .sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+
+        // Build dynamic table header
+        const headRow = document.getElementById("reportTableHead");
+        // Remove existing Q/Note headers beyond the first 5 static ones
+        while (headRow.children.length > 5)
+          headRow.removeChild(headRow.lastChild);
+        qs.forEach((q, i) => {
+          const thQ = document.createElement("th");
+          thQ.textContent = `Q${i + 1}`;
+          thQ.title = q.text || "";
+          headRow.appendChild(thQ);
+          const thN = document.createElement("th");
+          thN.textContent = `Noted Q${i + 1}`;
+          headRow.appendChild(thN);
+        });
 
         // Fetch all ratings
         const { data, error } = await db
@@ -2129,8 +2125,7 @@
           .order("created_at", { ascending: false });
 
         if (error) {
-          tbody.innerHTML =
-            '<tr class="empty-row"><td colspan="29">Failed to load data</td></tr>';
+          tbody.innerHTML = `<tr class="empty-row"><td colspan="${totalCols}">Failed to load data</td></tr>`;
           return;
         }
 
@@ -2179,10 +2174,6 @@
 
         reportData = filtered.map((r) => {
           const resp = r.responses || {};
-          // Build Q1-Q12 answer + note arrays
-          const qs = allQuestions
-            .slice()
-            .sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
           const row = {
             timestamp: new Date(r.created_at).toLocaleString(),
             username: r.submitted_by || "–",
@@ -2190,12 +2181,13 @@
             branch: r.branch || "–",
             date: r.rating_date || "–",
           };
-          for (let i = 0; i < 12; i++) {
-            const q = qs[i];
-            const ans = q ? resp[q.id] || {} : {};
+          // Dynamically map ALL questions, not just 12
+          qs.forEach((q, i) => {
+            const ans = resp[q.id] || {};
             row[`q${i + 1}`] = ans.answer ?? "–";
             row[`note${i + 1}`] = ans.note || "";
-          }
+          });
+          row._qCount = qs.length;
           return row;
         });
 
@@ -2204,20 +2196,21 @@
 
       function renderReportTable(rows) {
         const tbody = document.getElementById("reportTableBody");
+        const qCount = allQuestions.length;
+        const totalCols = 5 + qCount * 2;
         document.getElementById("reportCount").textContent =
           `${rows.length} submission${rows.length !== 1 ? "s" : ""}`;
 
         if (!rows.length) {
-          tbody.innerHTML =
-            '<tr class="empty-row"><td colspan="29">No records found</td></tr>';
+          tbody.innerHTML = `<tr class="empty-row"><td colspan="${totalCols}">No records found</td></tr>`;
           return;
         }
 
         tbody.innerHTML = rows
           .map((r) => {
             let qCells = "";
-            for (let i = 1; i <= 12; i++) {
-              const ans = r[`q${i}`];
+            for (let i = 1; i <= qCount; i++) {
+              const ans = r[`q${i}`] ?? "–";
               const note = r[`note${i}`] || "";
               const bad = isBad(ans);
               qCells += `<td><span class="badge-pill ${bad ? "badge-red" : ans === "–" ? "badge-gray" : "badge-green"}" style="white-space:nowrap">${ans}</span></td>`;
@@ -2259,73 +2252,39 @@
           alert("No data to export.");
           return;
         }
-        const headers = [
+        const qs = allQuestions
+          .slice()
+          .sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+        const qCount = qs.length;
+
+        const staticHeaders = [
           "Timestamp",
           "Username",
           "Driver",
           "Branch",
           "Date",
-          "Q1",
-          "Noted Q1",
-          "Q2",
-          "Noted Q2",
-          "Q3",
-          "Noted Q3",
-          "Q4",
-          "Noted Q4",
-          "Q5",
-          "Noted Q5",
-          "Q6",
-          "Noted Q6",
-          "Q7",
-          "Noted Q7",
-          "Q8",
-          "Noted Q8",
-          "Q9",
-          "Noted Q9",
-          "Q10",
-          "Noted Q10",
-          "Q11",
-          "Noted Q11",
-          "Q12",
-          "Noted Q12",
         ];
+        const qHeaders = [];
+        for (let i = 1; i <= qCount; i++) {
+          qHeaders.push(`Q${i}`, `Noted Q${i}`);
+        }
+        const headers = [...staticHeaders, ...qHeaders];
+
         const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-        const rows = reportData.map((r) =>
-          [
+        const rows = reportData.map((r) => {
+          const staticVals = [
             r.timestamp,
             r.username,
             r.driver,
             r.branch,
             r.date,
-            r.q1,
-            r.note1,
-            r.q2,
-            r.note2,
-            r.q3,
-            r.note3,
-            r.q4,
-            r.note4,
-            r.q5,
-            r.note5,
-            r.q6,
-            r.note6,
-            r.q7,
-            r.note7,
-            r.q8,
-            r.note8,
-            r.q9,
-            r.note9,
-            r.q10,
-            r.note10,
-            r.q11,
-            r.note11,
-            r.q12,
-            r.note12,
-          ]
-            .map(esc)
-            .join(","),
-        );
+          ];
+          const qVals = [];
+          for (let i = 1; i <= qCount; i++) {
+            qVals.push(r[`q${i}`] ?? "–", r[`note${i}`] ?? "");
+          }
+          return [...staticVals, ...qVals].map(esc).join(",");
+        });
 
         const csv = [headers.map(esc).join(","), ...rows].join("\r\n");
         const blob = new Blob(["\uFEFF" + csv], {
