@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Driver Rating — Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-mark">
+            <div class="logo-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.5"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <span class="logo-title">Driver Rating</span>
+          </div>
+          <div class="logo-sub">Admin Console</div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section-label">Overview</div>
+          <button class="nav-item active" onclick="showPanel('dashboard')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+              />
+            </svg>
+            Dashboard
+          </button>
+          <div class="nav-section-label">Manage</div>
+          <button class="nav-item" onclick="showPanel('drivers')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            Drivers <span class="badge" id="driverBadge">–</span>
+          </button>
+          <button class="nav-item" onclick="showPanel('questions')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            Questions <span class="badge" id="questionBadge">–</span>
+          </button>
+          <button class="nav-item" onclick="showPanel('branches')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              />
+            </svg>
+            Branches <span class="badge" id="branchBadge">–</span>
+          </button>
+          <button class="nav-item" onclick="showPanel('ratings')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+              />
+            </svg>
+            All Ratings
+          </button>
+          <button class="nav-item" onclick="showPanel('report')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Report
+          </button>
+        </nav>
+        <div class="sidebar-footer">Connected to Supabase · v1.0</div>
+      </aside>
+
+      <div class="main">
+        <div class="topbar">
+          <div class="topbar-left">
+            <div class="page-title" id="pageTitleText">Dashboard</div>
+            <div class="page-sub" id="pageSubText">
+              Overview of driver rating activity
+            </div>
+          </div>
+          <div class="topbar-right">
+            <div class="admin-pill">
+              <div class="admin-avatar">A</div>
+              <span class="admin-name">Admin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content">
+          <!-- DASHBOARD -->
+          <div class="panel active" id="panel-dashboard">
+            <!-- Date filter bar -->
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-body" style="padding: 14px 20px">
+                <div
+                  style="
+                    display: flex;
+                    align-items: flex-end;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                      margin-right: 4px;
+                    "
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      fill="none"
+                      stroke="var(--ink-light)"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span
+                      style="
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: var(--ink-mid);
+                      "
+                      >Filter by Date</span
+                    >
+                  </div>
+                  <div>
+                    <label class="field-label" style="margin-bottom: 4px"
+                      >From</label
+                    >
+                    <input
+                      type="date"
+                      id="dashDateFrom"
+                      onchange="loadDashboard()"
+                      style="width: 150px; padding: 7px 10px; font-size: 13px"
+                    />
+                  </div>
+                  <div>
+                    <label class="field-label" style="margin-bottom: 4px"
+                      >To</label
+                    >
+                    <input
+                      type="date"
+                      id="dashDateTo"
+                      onchange="loadDashboard()"
+                      style="width: 150px; padding: 7px 10px; font-size: 13px"
+                    />
+                  </div>
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    onclick="
+                      document.getElementById('dashDateFrom').value = '';
+                      document.getElementById('dashDateTo').value = '';
+                      loadDashboard();
+                    "
+                  >
+                    Clear
+                  </button>
+                  <span
+                    id="dashDateLabel"
+                    style="
+                      font-size: 11px;
+                      color: var(--ink-light);
+                      margin-left: 4px;
+                    "
+                  ></span>
+                </div>
+              </div>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-card green">
+                <div class="stat-icon green">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-val" id="statRatings">–</div>
+                <div class="stat-label">Total Ratings</div>
+              </div>
+              <div class="stat-card blue">
+                <div class="stat-icon blue">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-val" id="statDrivers">–</div>
+                <div class="stat-label">Active Drivers</div>
+              </div>
+              <div class="stat-card amber">
+                <div class="stat-icon amber">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-val" id="statBranches">–</div>
+                <div class="stat-label">Branches</div>
+              </div>
+              <div class="stat-card red">
+                <div class="stat-icon red">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+                <div class="stat-val" id="statIssues">–</div>
+                <div class="stat-label">Flagged Issues</div>
+              </div>
+            </div>
+            <div class="dash-grid">
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="section-title">Driver Performance</div>
+                    <div class="section-sub">Average scores per driver</div>
+                  </div>
+                </div>
+                <div id="driverPerfList"><div class="spinner"></div></div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <div>
+                    <div class="section-title">Recent Ratings</div>
+                    <div class="section-sub">Latest 8 submissions</div>
+                  </div>
+                </div>
+                <div id="recentRatingsList"><div class="spinner"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DRIVERS -->
+          <div class="panel" id="panel-drivers">
+            <div class="add-card">
+              <div class="add-card-header">
+                <div class="icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <div class="title">Add New Driver</div>
+              </div>
+              <div class="add-card-body">
+                <div id="driverStatus" class="status-banner"></div>
+                <div class="form-row">
+                  <div class="field">
+                    <label class="field-label">Driver Name <span>*</span></label
+                    ><input
+                      type="text"
+                      id="driverName"
+                      placeholder="e.g. Sokha Chann"
+                    />
+                  </div>
+                  <button
+                    class="btn btn-primary"
+                    onclick="addDriver()"
+                    style="flex-shrink: 0"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M12 4v16m8-8H4"
+                      /></svg
+                    >Add Driver
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div><div class="section-title">All Drivers</div></div>
+              </div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Ratings</th>
+                      <th>Avg Score</th>
+                      <th>Added</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="driverTableBody">
+                    <tr>
+                      <td colspan="6"><div class="spinner"></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUESTIONS -->
+          <div class="panel" id="panel-questions">
+            <div class="add-card">
+              <div class="add-card-header">
+                <div class="icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <div class="title">Add New Question</div>
+              </div>
+              <div class="add-card-body">
+                <div id="questionStatus" class="status-banner"></div>
+                <div class="form-grid form-grid-2">
+                  <div style="grid-column: 1/-1">
+                    <label class="field-label"
+                      >Question Text <span>*</span></label
+                    ><input
+                      type="text"
+                      id="qText"
+                      placeholder="e.g. Did the driver follow traffic rules?"
+                    />
+                  </div>
+                  <div>
+                    <label class="field-label"
+                      >Question Type <span>*</span></label
+                    >
+                    <div class="select-wrap">
+                      <select id="qType">
+                        <option value="range">Range (1–5 scale)</option>
+                        <option value="binary">Binary (OK / NOT OK)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="field-label">Sort Order</label
+                    ><input
+                      type="number"
+                      id="qOrder"
+                      placeholder="e.g. 1, 2, 3…"
+                      min="1"
+                    />
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn btn-primary" onclick="addQuestion()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M12 4v16m8-8H4"
+                      /></svg
+                    >Add Question
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="section-title">All Questions</div>
+                  <div class="section-sub">
+                    Displayed in sort order on the rating form
+                  </div>
+                </div>
+              </div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Question</th>
+                      <th>Type</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="questionTableBody">
+                    <tr>
+                      <td colspan="4"><div class="spinner"></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- BRANCHES -->
+          <div class="panel" id="panel-branches">
+            <div class="add-card">
+              <div class="add-card-header">
+                <div class="icon">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <div class="title">Add New Branch</div>
+              </div>
+              <div class="add-card-body">
+                <div id="branchStatus" class="status-banner"></div>
+                <div class="form-row">
+                  <div class="field">
+                    <label class="field-label">Branch Name <span>*</span></label
+                    ><input
+                      type="text"
+                      id="branchName"
+                      placeholder="e.g. Phnom Penh Central"
+                    />
+                  </div>
+                  <button
+                    class="btn btn-primary"
+                    onclick="addBranch()"
+                    style="flex-shrink: 0"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M12 4v16m8-8H4"
+                      /></svg
+                    >Add Branch
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div><div class="section-title">All Branches</div></div>
+              </div>
+              <div class="tbl-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Branch Name</th>
+                      <th>Total Ratings</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="branchTableBody">
+                    <tr>
+                      <td colspan="4"><div class="spinner"></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ALL RATINGS -->
+          <div class="panel" id="panel-ratings">
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-header">
+                <div><div class="section-title">Filter Ratings</div></div>
+              </div>
+              <div class="card-body">
+                <div
+                  class="form-grid"
+                  style="grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px"
+                >
+                  <div>
+                    <label class="field-label">Driver</label>
+                    <div class="select-wrap">
+                      <select id="filterDriver" onchange="loadRatings()">
+                        <option value="">All Drivers</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="field-label">Branch</label>
+                    <div class="select-wrap">
+                      <select id="filterBranch" onchange="loadRatings()">
+                        <option value="">All Branches</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="field-label">Trip Date From</label>
+                    <input
+                      type="date"
+                      id="filterDateFrom"
+                      onchange="loadRatings()"
+                    />
+                  </div>
+                  <div>
+                    <label class="field-label">Trip Date To</label>
+                    <input
+                      type="date"
+                      id="filterDateTo"
+                      onchange="loadRatings()"
+                    />
+                  </div>
+                </div>
+                <div style="margin-top: 10px; text-align: right">
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    onclick="
+                      document.getElementById('filterDriver').value = '';
+                      document.getElementById('filterBranch').value = '';
+                      document.getElementById('filterDateFrom').value = '';
+                      document.getElementById('filterDateTo').value = '';
+                      loadRatings();
+                    "
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="section-title">Rating Submissions</div>
+                  <div class="section-sub" id="ratingsCount">Loading…</div>
+                </div>
+              </div>
+              <div class="tbl-wrap">
+                <!-- ✅ FIX: ID corrected to "ratingTableBody" to match JS -->
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Driver</th>
+                      <th>Branch</th>
+                      <th>Trip Date</th>
+                      <th>Submitted By</th>
+                      <th>Issues</th>
+                      <th>Submitted At</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ratingTableBody">
+                    <tr>
+                      <td colspan="7"><div class="spinner"></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- REPORT -->
+          <div class="panel" id="panel-report">
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-header">
+                <div>
+                  <div class="section-title">Rating Log — Monthly Report</div>
+                  <div class="section-sub">
+                    Full breakdown of all rating responses per submission
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div
+                  class="form-row"
+                  style="align-items: flex-end; gap: 12px; flex-wrap: wrap"
+                >
+                  <div class="field" style="min-width: 160px">
+                    <label class="field-label">Month</label>
+                    <div class="select-wrap">
+                      <select id="reportMonthFilter" onchange="loadReport()">
+                        <option value="">All Months</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="field" style="min-width: 140px">
+                    <label class="field-label">Trip Date From</label>
+                    <input
+                      type="date"
+                      id="reportDateFrom"
+                      onchange="loadReport()"
+                    />
+                  </div>
+                  <div class="field" style="min-width: 140px">
+                    <label class="field-label">Trip Date To</label>
+                    <input
+                      type="date"
+                      id="reportDateTo"
+                      onchange="loadReport()"
+                    />
+                  </div>
+                  <div class="field" style="flex: 1; min-width: 200px">
+                    <label class="field-label">Search</label
+                    ><input
+                      type="text"
+                      id="reportSearch"
+                      placeholder="Search by username, driver, branch…"
+                      oninput="filterReportTable()"
+                    />
+                  </div>
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    style="margin-top: 6px; flex-shrink: 0"
+                    onclick="
+                      document.getElementById('reportMonthFilter').value = '';
+                      document.getElementById('reportDateFrom').value = '';
+                      document.getElementById('reportDateTo').value = '';
+                      document.getElementById('reportSearch').value = '';
+                      loadReport();
+                    "
+                  >
+                    Clear
+                  </button>
+                  <button
+                    class="btn btn-primary"
+                    onclick="exportReportCSV()"
+                    style="flex-shrink: 0; margin-top: 6px"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      /></svg
+                    >Export CSV
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="section-title">Rating Log</div>
+                  <div class="section-sub" id="reportCount">Loading…</div>
+                </div>
+              </div>
+              <div class="tbl-wrap" style="overflow-x: auto">
+                <table id="reportTable" style="min-width: 2400px">
+                  <thead>
+                    <tr id="reportTableHead">
+                      <th>Timestamp</th>
+                      <th>Username</th>
+                      <th>Driver</th>
+                      <th>Branch</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportTableBody">
+                    <tr>
+                      <td colspan="29"><div class="spinner"></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Question Modal -->
+    <div class="modal-overlay" id="editQModal">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Edit Question</div>
+          <div class="modal-sub">Update the question details below</div>
+        </div>
+        <div class="modal-body">
+          <div id="editQStatus" class="status-banner"></div>
+          <input type="hidden" id="editQId" />
+          <div class="form-grid" style="gap: 14px">
+            <div>
+              <label class="field-label">Question Text <span>*</span></label
+              ><input type="text" id="editQText" />
+            </div>
+            <div class="form-grid form-grid-2">
+              <div>
+                <label class="field-label">Type</label>
+                <div class="select-wrap">
+                  <select id="editQType">
+                    <option value="range">Range (1–5)</option>
+                    <option value="binary">Binary (OK / NOT OK)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="field-label">Sort Order</label
+                ><input type="number" id="editQOrder" min="1" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('editQModal')">
+            Cancel</button
+          ><button class="btn btn-primary" onclick="saveQuestion()">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating Detail Modal -->
+    <div class="modal-overlay" id="ratingDetailModal">
+      <div class="modal" style="max-width: 540px">
+        <div class="modal-header">
+          <div class="modal-title" id="ratingDetailTitle">Rating Details</div>
+          <div class="modal-sub" id="ratingDetailSub"></div>
+        </div>
+        <div class="modal-body" id="ratingDetailBody"></div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-ghost"
+            onclick="closeModal('ratingDetailModal')"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Delete (drivers/questions/branches) -->
+    <div class="modal-overlay" id="confirmModal">
+      <div class="modal" style="max-width: 380px">
+        <div class="confirm-body">
+          <div class="confirm-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </div>
+          <div class="confirm-title" id="confirmTitle">Delete Item?</div>
+          <div class="confirm-desc" id="confirmDesc">
+            This action cannot be undone.
+          </div>
+        </div>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost" onclick="closeModal('confirmModal')">
+            Cancel</button
+          ><button class="btn btn-danger" id="confirmBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Delete Rating -->
+    <div class="modal-overlay" id="deleteModal">
+      <div class="modal" style="max-width: 400px">
+        <div class="confirm-body">
+          <div class="confirm-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </div>
+          <div class="confirm-title">Delete Submission?</div>
+          <div class="confirm-desc">
+            Are you sure you want to remove this rating? This action cannot be
+            undone.
+          </div>
+        </div>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost" onclick="closeModal('deleteModal')">
+            Cancel</button
+          ><button
+            class="btn btn-danger"
+            id="confirmDeleteBtn"
+            onclick="executeDeleteRating()"
+          >
+            Delete Now
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Rating Modal -->
+    <div class="modal-overlay" id="editRatingModal">
+      <div class="modal" style="max-width: 580px">
+        <div class="modal-header">
+          <div class="modal-title">Edit Rating Submission</div>
+          <div class="modal-sub">
+            Update submission details and question responses
+          </div>
+        </div>
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto">
+          <div id="editRatingStatus" class="status-banner"></div>
+          <input type="hidden" id="editRatingId" />
+          <div class="form-grid" style="gap: 14px">
+            <div>
+              <label class="field-label">Driver <span>*</span></label>
+              <div class="select-wrap">
+                <select id="editRatingDriver"></select>
+              </div>
+            </div>
+            <div class="form-grid form-grid-2">
+              <div>
+                <label class="field-label">Branch <span>*</span></label>
+                <div class="select-wrap">
+                  <select id="editRatingBranch"></select>
+                </div>
+              </div>
+              <div>
+                <label class="field-label">Trip Date</label>
+                <input
+                  type="text"
+                  id="editRatingDate"
+                  placeholder="e.g. 5/5/2026"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Submitted By</label>
+              <input
+                type="text"
+                id="editRatingSubmittedBy"
+                placeholder="Username"
+              />
+            </div>
+          </div>
+          <!-- Dynamic question responses injected here -->
+          <div id="editRatingQuestions"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal('editRatingModal')">
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            id="saveRatingBtn"
+            onclick="saveEditRating()"
+          >
+            <svg
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2.5"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
