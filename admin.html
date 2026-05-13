@@ -1635,12 +1635,14 @@
 
     <!-- Edit Rating Modal -->
     <div class="modal-overlay" id="editRatingModal">
-      <div class="modal" style="max-width: 500px">
+      <div class="modal" style="max-width: 580px">
         <div class="modal-header">
           <div class="modal-title">Edit Rating Submission</div>
-          <div class="modal-sub">Update the submission details below</div>
+          <div class="modal-sub">
+            Update submission details and question responses
+          </div>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto">
           <div id="editRatingStatus" class="status-banner"></div>
           <input type="hidden" id="editRatingId" />
           <div class="form-grid" style="gap: 14px">
@@ -1675,6 +1677,8 @@
               />
             </div>
           </div>
+          <!-- Dynamic question responses injected here -->
+          <div id="editRatingQuestions"></div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="closeModal('editRatingModal')">
@@ -1704,7 +1708,6 @@
         </div>
       </div>
     </div>
-
     <script>
       const supabaseUrl = "https://vioupfkhpdyfbuatjtxr.supabase.co";
       const supabaseKey =
@@ -2335,6 +2338,58 @@
           )
           .join("");
 
+        // Render question response fields
+        const resp = r.responses || {};
+        const qs = allQuestions
+          .slice()
+          .sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+        const qContainer = document.getElementById("editRatingQuestions");
+        if (qs.length === 0) {
+          qContainer.innerHTML = "";
+        } else {
+          qContainer.innerHTML =
+            `<div style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">` +
+            `<div style="font-size:12px;font-weight:700;color:var(--ink-mid);margin-bottom:14px;letter-spacing:0.04em;text-transform:uppercase">Question Responses</div>` +
+            qs
+              .map((q, i) => {
+                const existing = resp[q.id] || {};
+                const ansVal = existing.answer ?? "";
+                const noteVal = existing.note ?? "";
+                const isBinary = q.question_type === "binary";
+                const answerField = isBinary
+                  ? `<div class="select-wrap"><select id="editQ_ans_${q.id}">
+              <option value="" ${ansVal === "" ? "selected" : ""}></option>
+              <option value="OK" ${ansVal === "OK" ? "selected" : ""}>OK</option>
+              <option value="NOT OKAY" ${ansVal === "NOT OKAY" ? "selected" : ""}>NOT OKAY</option>
+            </select></div>`
+                  : `<div class="select-wrap"><select id="editQ_ans_${q.id}">
+              <option value="" ${ansVal === "" ? "selected" : ""}></option>
+              <option value="1" ${ansVal === "1" ? "selected" : ""}>1</option>
+              <option value="2" ${ansVal === "2" ? "selected" : ""}>2</option>
+              <option value="3" ${ansVal === "3" ? "selected" : ""}>3</option>
+              <option value="4" ${ansVal === "4" ? "selected" : ""}>4</option>
+              <option value="5" ${ansVal === "5" ? "selected" : ""}>5</option>
+            </select></div>`;
+                return `<div style="padding:12px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:10px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;background:var(--surface);color:var(--ink-mid);font-size:10px;font-weight:700;margin-right:6px">${i + 1}</span>${q.question_text}
+          </div>
+          <div class="form-grid form-grid-2" style="gap:10px">
+            <div>
+              <label class="field-label" style="font-size:11px">Answer</label>
+              ${answerField}
+            </div>
+            <div>
+              <label class="field-label" style="font-size:11px">Note</label>
+              <input type="text" id="editQ_note_${q.id}" value="${noteVal.replace(/"/g, "&quot;")}" placeholder="Optional note…" style="font-size:13px;padding:8px 12px" />
+            </div>
+          </div>
+        </div>`;
+              })
+              .join("") +
+            `</div>`;
+        }
+
         const btn = document.getElementById("saveRatingBtn");
         btn.disabled = false;
         btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Save Changes`;
@@ -2362,6 +2417,23 @@
           return;
         }
 
+        // Collect updated responses from question fields
+        const r = allRatings.find((x) => x.id === id);
+        const existingResp = r ? { ...(r.responses || {}) } : {};
+        const qs = allQuestions
+          .slice()
+          .sort((a, b) => (a.sort_order || 99) - (b.sort_order || 99));
+        qs.forEach((q) => {
+          const ansEl = document.getElementById(`editQ_ans_${q.id}`);
+          const noteEl = document.getElementById(`editQ_note_${q.id}`);
+          if (ansEl) {
+            existingResp[q.id] = {
+              answer: ansEl.value,
+              note: noteEl ? noteEl.value : existingResp[q.id]?.note || "",
+            };
+          }
+        });
+
         const btn = document.getElementById("saveRatingBtn");
         btn.disabled = true;
         btn.textContent = "Saving…";
@@ -2373,6 +2445,7 @@
             branch,
             rating_date: rating_date || null,
             submitted_by,
+            responses: existingResp,
           })
           .eq("id", id);
 
@@ -2392,6 +2465,7 @@
             branch,
             rating_date: rating_date || null,
             submitted_by,
+            responses: existingResp,
           };
         }
 
